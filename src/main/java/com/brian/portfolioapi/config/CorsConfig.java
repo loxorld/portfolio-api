@@ -12,7 +12,8 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedOrigins(
                         "http://localhost:3000",                     // front local
-                        "https://portfolio-brian-ladelfa.up.railway.app" // swagger en prod
+                        "https://portfolio-brian-ladelfa.up.railway.app", // swagger en prod
+                        "https://*.vercel.app"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
