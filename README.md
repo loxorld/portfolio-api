@@ -1,7 +1,5 @@
 # README — BACKEND (`portfolio-api`)
 
-Copiá **todo esto** en `portfolio-api/README.md`
-
 ```md
 # Portfolio API
 
