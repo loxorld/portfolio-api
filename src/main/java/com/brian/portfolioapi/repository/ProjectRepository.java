@@ -26,4 +26,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
           )
         """)
     Page<Project> findByStatusAndTag(ProjectStatus status, String tag, Pageable pageable);
+
+    Optional<Project> findBySlug(String slug);
+    boolean existsBySlug(String slug);
 }

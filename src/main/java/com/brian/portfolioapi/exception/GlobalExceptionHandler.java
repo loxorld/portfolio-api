@@ -89,4 +89,26 @@ public class GlobalExceptionHandler {
         pd.setProperty("path", req.getRequestURI());
         return pd;
     }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ProblemDetail handleUnauthorized(UnauthorizedException ex, HttpServletRequest req) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+        pd.setTitle("Unauthorized");
+        pd.setDetail(ex.getMessage());
+        pd.setProperty("path", req.getRequestURI());
+        pd.setProperty("timestamp", Instant.now());
+        return pd;
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ProblemDetail handleForbidden(ForbiddenException ex, HttpServletRequest req) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+        pd.setTitle("Forbidden");
+        pd.setDetail(ex.getMessage());
+        pd.setProperty("path", req.getRequestURI());
+        pd.setProperty("timestamp", Instant.now());
+        return pd;
+    }
+
+
 }
