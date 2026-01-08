@@ -36,8 +36,7 @@ public class Project {
     @Column(nullable = false, length = 220)
     private String summary;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(columnDefinition = "text")
     private String description;
 
     @Enumerated(EnumType.STRING)
