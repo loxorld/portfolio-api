@@ -33,7 +33,7 @@ https://github.com/loxorld/portfolio-web
 
 ---
 
-## 📡 Endpoints principales
+##  Endpoints principales
 
 | Método | Endpoint | Descripción |
 |------|--------|------------|
@@ -42,7 +42,7 @@ https://github.com/loxorld/portfolio-web
 
 ---
 
-## 📄 Documentación API
+##  Documentación API
 
 Swagger UI: http://localhost:8085/swagger
 OpenAPI: http://localhost:8085/api-docs
