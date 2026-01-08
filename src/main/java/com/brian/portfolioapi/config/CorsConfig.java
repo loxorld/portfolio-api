@@ -10,13 +10,14 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                // Local (dev)
-                .allowedOrigins("http://localhost:3000")
-                // Métodos que usás
-                .allowedMethods("GET")
-                // Headers típicos
+                .allowedOrigins(
+                        "http://localhost:3000",                     // front local
+                        "https://portfolio-brian-ladelfa.up.railway.app" // swagger en prod
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                // Cache del preflight
+                .allowCredentials(false)
                 .maxAge(3600);
     }
 }
+
