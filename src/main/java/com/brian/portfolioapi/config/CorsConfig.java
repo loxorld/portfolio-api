@@ -9,16 +9,26 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
+
+        // Público (solo lectura desde  front)
+        registry.addMapping("/api/projects/**")
                 .allowedOriginPatterns(
-                        "http://localhost:3000",                         // front local
-                        "https://portfolio-brian-ladelfa.up.railway.app", // swagger en prod
-                        "https://portfolio-web-orpin-three.vercel.app"                           // previews + prod si cambia
+                        "http://localhost:3000",
+                        "https://portfolio-web-orpin-three.vercel.app"
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(false)
+                .maxAge(3600);
+
+        // Admin (solo desde Swagger en Railway)
+        registry.addMapping("/api/admin/**")
+                .allowedOriginPatterns(
+                        "https://portfolio-brian-ladelfa.up.railway.app"
+                )
+                .allowedMethods("POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(false)
                 .maxAge(3600);
     }
 }
-
