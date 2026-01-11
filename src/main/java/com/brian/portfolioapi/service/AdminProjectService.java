@@ -23,13 +23,14 @@ public class AdminProjectService {
 
     @Transactional
     public Project create(ProjectUpsertRequest req) {
+        String normalizedSlug = normalizeSlug(req.slug());
         // Slug único para evitar choque
-        if (repo.existsBySlug(req.slug())) {
-            throw new IllegalArgumentException("Slug already exists: " + req.slug());
+        if (repo.existsBySlug(normalizedSlug)) {
+            throw new IllegalArgumentException("Slug already exists: " + normalizedSlug);
         }
 
         Project p = new Project();
-        apply(p, req);
+        apply(p, req, normalizedSlug);
         return repo.save(p);
     }
 
@@ -38,12 +39,15 @@ public class AdminProjectService {
         Project p = repo.findBySlug(slug)
                 .orElseThrow(() -> new NotFoundException("Project not found: " + slug));
 
+        String normalizedSlug = normalizeSlug(slug);
+        String normalizedReqSlug = normalizeSlug(req.slug());
+
         // Permitimos cambiar slug, pero controlamos colisión
-        if (!slug.equals(req.slug()) && repo.existsBySlug(req.slug())) {
-            throw new IllegalArgumentException("Slug already exists: " + req.slug());
+        if (!normalizedSlug.equals(normalizedReqSlug) && repo.existsBySlug(normalizedReqSlug)) {
+            throw new IllegalArgumentException("Slug already exists: " + normalizedReqSlug);
         }
 
-        apply(p, req);
+        apply(p, req, normalizedSlug);
         return repo.save(p);
     }
 
@@ -54,8 +58,8 @@ public class AdminProjectService {
         repo.delete(p);
     }
 
-    private void apply(Project p, ProjectUpsertRequest req) {
-        p.setSlug(req.slug().trim());
+    private void apply(Project p, ProjectUpsertRequest req, String normalizedSlug) {
+        p.setSlug(normalizedSlug);
         p.setTitle(req.title().trim());
         p.setSummary(req.summary().trim());
         p.setDescription(req.description());
@@ -75,5 +79,9 @@ public class AdminProjectService {
             p.setStatus(ProjectStatus.DRAFT);
             p.setPublishedAt(null);
         }
+    }
+
+    private String normalizeSlug(String slug) {
+        return slug == null ? null : slug.toLowerCase();
     }
 }
