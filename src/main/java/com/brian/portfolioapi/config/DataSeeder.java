@@ -24,30 +24,31 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Evita duplicar si reiniciás
-        if (repo.count() > 0) return;
+        if (repo.count() > 0) {
+            return;
+        }
 
         repo.saveAll(List.of(
                 buildProject(
                         "cedica-app",
-                        "CEDICA – Gestión institucional",
-                        "App web fullstack para gestión de terapias asistidas con caballos.",
-                        "Descripción larga en markdown o texto plano (después la mejoramos).",
+                        "CEDICA - Gestion institucional",
+                        "App para centralizar legajos, turnos y seguimiento interno.",
+                        "Proyecto de ejemplo para desarrollo local. Simula un sistema interno con foco en orden administrativo, trazabilidad y una API lista para consumir desde el frontend.",
                         Set.of("fullstack", "spring", "postgres"),
                         Set.of("Java", "Spring Boot", "PostgreSQL"),
-                        List.of("https://picsum.photos/seed/cedica/1200/800"),
+                        List.of(),
                         "https://github.com/brian/cedica",
                         null,
                         Instant.parse("2025-10-01T00:00:00Z")
                 ),
                 buildProject(
                         "volvi-a-casa",
-                        "Volvé a Casa – Mascotas perdidas",
-                        "Sistema para reportar y encontrar mascotas con panel y autenticación.",
-                        "Descripción larga del proyecto…",
+                        "Volve a Casa - Mascotas perdidas",
+                        "Sistema para publicar avisos, registrar reportes y seguir casos.",
+                        "Proyecto de ejemplo para poblar la API en entorno local. Incluye un caso orientado a formularios, validaciones y gestion de estados desde un panel administrativo.",
                         Set.of("backend", "api", "jwt"),
                         Set.of("Java", "Spring", "JWT"),
-                        List.of("https://picsum.photos/seed/volvi/1200/800"),
+                        List.of(),
                         "https://github.com/brian/volvi-a-casa",
                         null,
                         Instant.parse("2025-12-10T00:00:00Z")

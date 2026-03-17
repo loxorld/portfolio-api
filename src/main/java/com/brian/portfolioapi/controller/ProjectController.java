@@ -14,12 +14,16 @@ import org.springframework.data.domain.*;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Parameter;
 
+import java.util.Set;
+
 
 @Tag(name = "Projects", description = "Public portfolio projects (read-only)")
 @Validated
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
+
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("publishedAt", "title", "slug");
 
     private final ProjectService service;
 
@@ -34,6 +38,7 @@ public class ProjectController {
             @RequestParam(required = false) String tag,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "12") @Min(1) @Max(50) int size,
+            @Parameter(description = "Sort using one of: publishedAt,desc | publishedAt,asc | title,asc | title,desc | slug,asc | slug,desc")
             @RequestParam(defaultValue = "publishedAt,desc") String sort
     ) {
         Pageable pageable = PageRequest.of(page, size, parseSort(sort));
@@ -47,12 +52,26 @@ public class ProjectController {
     }
 
     private Sort parseSort(String sort) {
-        String[] parts = sort.split(",", 2);
-        String field = parts[0];
-        Sort.Direction dir =
-                parts.length > 1 && parts[1].equalsIgnoreCase("asc")
-                        ? Sort.Direction.ASC
-                        : Sort.Direction.DESC;
+        String normalizedSort = (sort == null || sort.isBlank())
+                ? "publishedAt,desc"
+                : sort.trim();
+
+        String[] parts = normalizedSort.split(",", 2);
+        String field = parts[0].trim();
+        if (!ALLOWED_SORT_FIELDS.contains(field)) {
+            throw new IllegalArgumentException(
+                    "Unsupported sort field: " + field + ". Allowed values: publishedAt, title, slug"
+            );
+        }
+
+        String rawDirection = parts.length > 1 ? parts[1].trim() : "desc";
+        Sort.Direction dir = switch (rawDirection.toLowerCase()) {
+            case "asc" -> Sort.Direction.ASC;
+            case "desc", "" -> Sort.Direction.DESC;
+            default -> throw new IllegalArgumentException(
+                    "Unsupported sort direction: " + rawDirection + ". Allowed values: asc, desc"
+            );
+        };
 
         return Sort.by(dir, field);
     }

@@ -29,10 +29,6 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-    /**
-     * @Valid en @RequestBody (DTOs de entrada).
-     * Ej: POST con campos inválidos -> 400
-     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest req) {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -44,9 +40,6 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-    /**
-     * Validación de parámetros: @Min/@Max/@NotBlank en @RequestParam, @PathVariable, etc.
-     */
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest req) {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -58,10 +51,6 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-    /**
-     * Errores típicos de argumentos inválidos que tiran IllegalArgumentException
-     * (por ejemplo PageRequest.of(-1, ...) si llega un page negativo).
-     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -73,10 +62,6 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-    /**
-     * Fallback: cualquier otro error no controlado.
-     * No exponemos detalles al cliente, pero lo logueamos para debug.
-     */
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneric(Exception ex, HttpServletRequest req) {
         log.error("Unhandled error on {} {}", req.getMethod(), req.getRequestURI(), ex);
@@ -109,6 +94,4 @@ public class GlobalExceptionHandler {
         pd.setProperty("timestamp", Instant.now());
         return pd;
     }
-
-
 }

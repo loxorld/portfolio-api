@@ -1,72 +1,110 @@
 package com.brian.portfolioapi.controller;
 
-import com.brian.portfolioapi.config.AdminProperties;
+import com.brian.portfolioapi.dto.AdminProjectDetailResponse;
+import com.brian.portfolioapi.dto.AdminProjectSummaryResponse;
+import com.brian.portfolioapi.dto.PageResponse;
 import com.brian.portfolioapi.dto.ProjectDetailResponse;
 import com.brian.portfolioapi.dto.ProjectUpsertRequest;
-import com.brian.portfolioapi.exception.ForbiddenException;
-import com.brian.portfolioapi.exception.UnauthorizedException;
 import com.brian.portfolioapi.mapper.ProjectMapper;
 import com.brian.portfolioapi.model.Project;
 import com.brian.portfolioapi.service.AdminProjectService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 @Tag(name = "Admin Projects", description = "Admin-only endpoints to manage portfolio projects")
+@SecurityRequirement(name = "adminToken")
+@Validated
 @RestController
 @RequestMapping("/api/admin/projects")
 public class AdminProjectController {
 
-    private final AdminProjectService service;
-    private final AdminProperties admin;
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "updatedAt",
+            "createdAt",
+            "publishedAt",
+            "title",
+            "slug",
+            "status"
+    );
 
-    public AdminProjectController(AdminProjectService service, AdminProperties admin) {
+    private final AdminProjectService service;
+
+    public AdminProjectController(AdminProjectService service) {
         this.service = service;
-        this.admin = admin;
+    }
+
+    @GetMapping
+    public PageResponse<AdminProjectSummaryResponse> list(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
+            @RequestParam(defaultValue = "updatedAt,desc") String sort
+    ) {
+        Pageable pageable = PageRequest.of(page, size, parseSort(sort));
+        return service.listAll(pageable);
+    }
+
+    @GetMapping("/{slug}")
+    public AdminProjectDetailResponse detail(@PathVariable String slug) {
+        return service.getDetailBySlug(slug);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDetailResponse create(
-            @RequestHeader(value = "X-Admin-Token", required = false) String token,
             @Valid @RequestBody ProjectUpsertRequest req
     ) {
-        authorize(token);
         Project created = service.create(req);
         return ProjectMapper.toDetail(created);
     }
 
     @PutMapping("/{slug}")
     public ProjectDetailResponse update(
-            @RequestHeader(value = "X-Admin-Token", required = false) String token,
             @PathVariable String slug,
             @Valid @RequestBody ProjectUpsertRequest req
     ) {
-        authorize(token);
         Project updated = service.updateBySlug(slug, req);
         return ProjectMapper.toDetail(updated);
     }
 
     @DeleteMapping("/{slug}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
-            @RequestHeader(value = "X-Admin-Token", required = false) String token,
-            @PathVariable String slug
-    ) {
-        authorize(token);
+    public void delete(@PathVariable String slug) {
         service.deleteBySlug(slug);
     }
 
-    private void authorize(String token) {
-        if (token == null || token.isBlank()) {
-            throw new UnauthorizedException("Missing X-Admin-Token header");
+    private Sort parseSort(String sort) {
+        String normalizedSort = (sort == null || sort.isBlank())
+                ? "updatedAt,desc"
+                : sort.trim();
+
+        String[] parts = normalizedSort.split(",", 2);
+        String field = parts[0].trim();
+        if (!ALLOWED_SORT_FIELDS.contains(field)) {
+            throw new IllegalArgumentException(
+                    "Unsupported sort field: " + field + ". Allowed values: updatedAt, createdAt, publishedAt, title, slug, status"
+            );
         }
-        if (admin.token() == null || admin.token().isBlank()) {
-            throw new ForbiddenException("Admin token is not configured on server");
-        }
-        if (!admin.token().equals(token)) {
-            throw new ForbiddenException("Invalid admin token");
-        }
+
+        String rawDirection = parts.length > 1 ? parts[1].trim() : "desc";
+        Sort.Direction dir = switch (rawDirection.toLowerCase()) {
+            case "asc" -> Sort.Direction.ASC;
+            case "desc", "" -> Sort.Direction.DESC;
+            default -> throw new IllegalArgumentException(
+                    "Unsupported sort direction: " + rawDirection + ". Allowed values: asc, desc"
+            );
+        };
+
+        return Sort.by(dir, field);
     }
 }

@@ -1,70 +1,52 @@
-# README — BACKEND (`portfolio-api`)
-
-```md
 # Portfolio API
 
-API REST desarrollada en Java con Spring Boot.  
-Provee los datos utilizados por el frontend de mi portfolio profesional.
+Backend del portfolio personal. Expone endpoints publicos para listar proyectos
+y endpoints admin protegidos por token para gestionarlos desde el panel web.
 
-🔗 **Repositorio frontend:**  
-https://github.com/loxorld/portfolio-web
+Repositorio frontend: https://github.com/loxorld/portfolio-web
 
----
-
-## ✨ Características
-
-- API REST pública
-- Listado de proyectos publicados
-- Detalle de proyecto por slug
-- Validaciones y manejo global de errores
-- Documentación con Swagger
-- Persistencia con PostgreSQL
-
----
-
-## 🧱 Stack
+## Stack
 
 - Java 21
 - Spring Boot
-- Spring Web
+- Spring Web MVC
 - Spring Data JPA
+- Spring Security
 - PostgreSQL
 - Maven
 
----
+## Endpoints principales
 
-##  Endpoints principales
+| Metodo | Endpoint | Uso |
+| --- | --- | --- |
+| GET | `/api/projects` | Lista proyectos publicados |
+| GET | `/api/projects/{slug}` | Devuelve el detalle de un proyecto publicado |
+| GET | `/api/admin/projects` | Lista proyectos para el panel admin |
+| GET | `/api/admin/projects/{slug}` | Devuelve el detalle completo para edicion |
+| POST | `/api/admin/projects` | Crea un proyecto |
+| PUT | `/api/admin/projects/{slug}` | Actualiza un proyecto |
+| DELETE | `/api/admin/projects/{slug}` | Elimina un proyecto |
 
-| Método | Endpoint | Descripción |
-|------|--------|------------|
-| GET | `/api/projects` | Lista de proyectos publicados |
-| GET | `/api/projects/{slug}` | Detalle de un proyecto |
+Swagger UI: `http://localhost:8085/swagger`
+OpenAPI: `http://localhost:8085/api-docs`
 
----
+## Desarrollo local
 
-##  Documentación API
+Requisitos:
 
-Swagger UI: http://localhost:8085/swagger
-OpenAPI: http://localhost:8085/api-docs
-
----
-
-## 🛠️ Desarrollo local (opcional)
-
-### Requisitos
 - Java 21
-- Maven
 - PostgreSQL
 
-### Base de datos
+Configuracion minima:
 
-Crear una base de datos llamada `portfolio`.
+1. Crear una base llamada `portfolio`.
+2. Ejecutar la app con el perfil `dev`.
+3. Definir `ADMIN_TOKEN` si vas a usar el panel admin.
 
-Ejemplo:
-```sql
-CREATE DATABASE portfolio;
+Inicio rapido:
 
-📌 Notas
+```bash
+./mvnw spring-boot:run
+```
 
-Esta API es consumida por un frontend desarrollado en Next.js.
-El objetivo del proyecto es demostrar arquitectura backend, buenas prácticas y exposición de datos para un portfolio profesional.
+En desarrollo la API queda disponible en `http://localhost:8085`.
