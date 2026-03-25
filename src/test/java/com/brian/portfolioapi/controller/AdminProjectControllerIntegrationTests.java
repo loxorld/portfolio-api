@@ -1,6 +1,7 @@
 package com.brian.portfolioapi.controller;
 
 import com.brian.portfolioapi.model.Project;
+import com.brian.portfolioapi.model.ProjectStage;
 import com.brian.portfolioapi.model.ProjectStatus;
 import com.brian.portfolioapi.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ class AdminProjectControllerIntegrationTests {
     void createRequiresAdminToken() throws Exception {
         mockMvc.perform(post("/api/admin/projects")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(sampleRequestJson("secure-project", publishedAt())))
+                        .content(sampleRequestJson("secure-project", ProjectStage.STABLE, publishedAt())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.title").value("Unauthorized"));
     }
@@ -57,13 +58,15 @@ class AdminProjectControllerIntegrationTests {
         mockMvc.perform(post("/api/admin/projects")
                         .header("X-Admin-Token", ADMIN_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(sampleRequestJson("My-New-Project", publishedAt())))
+                        .content(sampleRequestJson("My-New-Project", ProjectStage.IN_DEVELOPMENT, publishedAt())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.slug").value("my-new-project"))
-                .andExpect(jsonPath("$.title").value("Project My-New-Project"));
+                .andExpect(jsonPath("$.title").value("Project My-New-Project"))
+                .andExpect(jsonPath("$.stage").value("IN_DEVELOPMENT"));
 
         Project saved = repo.findBySlug("my-new-project").orElseThrow();
         assertThat(saved.getStatus()).isEqualTo(ProjectStatus.PUBLISHED);
+        assertThat(saved.getStage()).isEqualTo(ProjectStage.IN_DEVELOPMENT);
     }
 
     @Test
@@ -71,7 +74,7 @@ class AdminProjectControllerIntegrationTests {
         mockMvc.perform(post("/api/admin/projects")
                         .header("X-Admin-Token", "wrong-token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(sampleRequestJson("blocked-project", publishedAt())))
+                        .content(sampleRequestJson("blocked-project", ProjectStage.STABLE, publishedAt())))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.title").value("Forbidden"))
                 .andExpect(jsonPath("$.detail").value("Invalid admin token"));
@@ -88,8 +91,10 @@ class AdminProjectControllerIntegrationTests {
                 .andExpect(jsonPath("$.items.length()").value(2))
                 .andExpect(jsonPath("$.items[0].slug").value("draft-project"))
                 .andExpect(jsonPath("$.items[0].status").value("DRAFT"))
+                .andExpect(jsonPath("$.items[0].stage").value("STABLE"))
                 .andExpect(jsonPath("$.items[1].slug").value("published-project"))
-                .andExpect(jsonPath("$.items[1].status").value("PUBLISHED"));
+                .andExpect(jsonPath("$.items[1].status").value("PUBLISHED"))
+                .andExpect(jsonPath("$.items[1].stage").value("IN_DEVELOPMENT"));
     }
 
     @Test
@@ -101,6 +106,7 @@ class AdminProjectControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slug").value("draft-project"))
                 .andExpect(jsonPath("$.status").value("DRAFT"))
+                .andExpect(jsonPath("$.stage").value("STABLE"))
                 .andExpect(jsonPath("$.publishedAt").doesNotExist());
     }
 
@@ -111,7 +117,7 @@ class AdminProjectControllerIntegrationTests {
         mockMvc.perform(put("/api/admin/projects/{slug}", "old-slug")
                         .header("X-Admin-Token", ADMIN_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(sampleRequestJson("new-slug", publishedAt())))
+                        .content(sampleRequestJson("new-slug", ProjectStage.STABLE, publishedAt())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slug").value("new-slug"));
 
@@ -130,7 +136,7 @@ class AdminProjectControllerIntegrationTests {
         assertThat(repo.findBySlug("project-to-delete")).isEmpty();
     }
 
-    private String sampleRequestJson(String slug, Instant publishedAt) {
+    private String sampleRequestJson(String slug, ProjectStage stage, Instant publishedAt) {
         return """
                 {
                   "slug": "%s",
@@ -142,9 +148,10 @@ class AdminProjectControllerIntegrationTests {
                   "imageUrls": ["https://img.example/%s.png"],
                   "repoUrl": "https://github.com/loxorld/%s",
                   "demoUrl": "https://demo.example/%s",
+                  "stage": "%s",
                   "publishedAt": "%s"
                 }
-                """.formatted(slug, slug, slug, slug, slug, slug, slug, publishedAt);
+                """.formatted(slug, slug, slug, slug, slug, slug, slug, stage, publishedAt);
     }
 
     private Instant publishedAt() {
@@ -157,6 +164,7 @@ class AdminProjectControllerIntegrationTests {
         project.setTitle("Existing " + slug);
         project.setSummary("Existing summary " + slug);
         project.setDescription("Existing description " + slug);
+        project.setStage(ProjectStage.IN_DEVELOPMENT);
         project.setStatus(ProjectStatus.PUBLISHED);
         project.setPublishedAt(Instant.parse("2025-03-15T10:00:00Z"));
         project.setTags(new LinkedHashSet<>(Set.of("existing")));

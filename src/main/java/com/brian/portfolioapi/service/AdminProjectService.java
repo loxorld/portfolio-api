@@ -7,6 +7,7 @@ import com.brian.portfolioapi.dto.ProjectUpsertRequest;
 import com.brian.portfolioapi.exception.NotFoundException;
 import com.brian.portfolioapi.mapper.ProjectMapper;
 import com.brian.portfolioapi.model.Project;
+import com.brian.portfolioapi.model.ProjectStage;
 import com.brian.portfolioapi.model.ProjectStatus;
 import com.brian.portfolioapi.repository.ProjectRepository;
 import org.springframework.data.domain.Page;
@@ -97,6 +98,7 @@ public class AdminProjectService {
 
         p.setRepoUrl(req.repoUrl());
         p.setDemoUrl(req.demoUrl());
+        p.setStage(req.stage() == null ? ProjectStage.STABLE : req.stage());
 
         Instant publishedAt = req.publishedAt();
         if (publishedAt != null) {

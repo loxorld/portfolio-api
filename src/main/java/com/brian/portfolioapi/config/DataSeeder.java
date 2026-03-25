@@ -1,6 +1,7 @@
 package com.brian.portfolioapi.config;
 
 import com.brian.portfolioapi.model.Project;
+import com.brian.portfolioapi.model.ProjectStage;
 import com.brian.portfolioapi.model.ProjectStatus;
 import com.brian.portfolioapi.repository.ProjectRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -39,6 +40,7 @@ public class DataSeeder implements CommandLineRunner {
                         List.of(),
                         "https://github.com/brian/cedica",
                         null,
+                        ProjectStage.STABLE,
                         Instant.parse("2025-10-01T00:00:00Z")
                 ),
                 buildProject(
@@ -51,6 +53,7 @@ public class DataSeeder implements CommandLineRunner {
                         List.of(),
                         "https://github.com/brian/volvi-a-casa",
                         null,
+                        ProjectStage.IN_DEVELOPMENT,
                         Instant.parse("2025-12-10T00:00:00Z")
                 )
         ));
@@ -66,6 +69,7 @@ public class DataSeeder implements CommandLineRunner {
             List<String> images,
             String repoUrl,
             String demoUrl,
+            ProjectStage stage,
             Instant publishedAt
     ) {
         Project p = new Project();
@@ -78,6 +82,7 @@ public class DataSeeder implements CommandLineRunner {
         p.setImageUrls(images);
         p.setRepoUrl(repoUrl);
         p.setDemoUrl(demoUrl);
+        p.setStage(stage);
         p.setStatus(ProjectStatus.PUBLISHED);
         p.setPublishedAt(publishedAt);
         return p;

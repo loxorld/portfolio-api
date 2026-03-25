@@ -1,6 +1,7 @@
 package com.brian.portfolioapi.controller;
 
 import com.brian.portfolioapi.model.Project;
+import com.brian.portfolioapi.model.ProjectStage;
 import com.brian.portfolioapi.model.ProjectStatus;
 import com.brian.portfolioapi.repository.ProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +43,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "older-project",
                 ProjectStatus.PUBLISHED,
+                ProjectStage.STABLE,
                 Instant.parse("2025-01-10T10:00:00Z"),
                 Set.of("java", "spring"),
                 Set.of("Java", "Spring Boot")
@@ -49,6 +51,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "draft-project",
                 ProjectStatus.DRAFT,
+                ProjectStage.STABLE,
                 null,
                 Set.of("internal"),
                 Set.of("Java")
@@ -56,6 +59,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "newer-project",
                 ProjectStatus.PUBLISHED,
+                ProjectStage.IN_DEVELOPMENT,
                 Instant.parse("2025-02-10T10:00:00Z"),
                 Set.of("next"),
                 Set.of("TypeScript", "Next.js")
@@ -65,7 +69,9 @@ class ProjectControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items", hasSize(2)))
                 .andExpect(jsonPath("$.items[0].slug").value("newer-project"))
+                .andExpect(jsonPath("$.items[0].stage").value("IN_DEVELOPMENT"))
                 .andExpect(jsonPath("$.items[1].slug").value("older-project"))
+                .andExpect(jsonPath("$.items[1].stage").value("STABLE"))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.hasNext").value(false))
                 .andExpect(jsonPath("$.hasPrevious").value(false));
@@ -76,6 +82,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "api-project",
                 ProjectStatus.PUBLISHED,
+                ProjectStage.STABLE,
                 Instant.parse("2025-03-01T12:00:00Z"),
                 Set.of("spring", "backend"),
                 Set.of("Java", "Spring Boot")
@@ -83,6 +90,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "frontend-project",
                 ProjectStatus.PUBLISHED,
+                ProjectStage.STABLE,
                 Instant.parse("2025-03-02T12:00:00Z"),
                 Set.of("next"),
                 Set.of("TypeScript", "Next.js")
@@ -99,6 +107,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "zeta-project",
                 ProjectStatus.PUBLISHED,
+                ProjectStage.STABLE,
                 Instant.parse("2025-03-01T12:00:00Z"),
                 Set.of("backend"),
                 Set.of("Java")
@@ -106,6 +115,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "alpha-project",
                 ProjectStatus.PUBLISHED,
+                ProjectStage.STABLE,
                 Instant.parse("2025-03-02T12:00:00Z"),
                 Set.of("frontend"),
                 Set.of("TypeScript")
@@ -138,6 +148,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "portfolio-api",
                 ProjectStatus.PUBLISHED,
+                ProjectStage.STABLE,
                 Instant.parse("2025-03-05T15:30:00Z"),
                 Set.of("spring"),
                 Set.of("Java", "PostgreSQL")
@@ -147,6 +158,7 @@ class ProjectControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slug").value("portfolio-api"))
                 .andExpect(jsonPath("$.title").value("Title portfolio-api"))
+                .andExpect(jsonPath("$.stage").value("STABLE"))
                 .andExpect(jsonPath("$.stack", hasSize(2)));
     }
 
@@ -155,6 +167,7 @@ class ProjectControllerIntegrationTests {
         saveProject(
                 "hidden-project",
                 ProjectStatus.DRAFT,
+                ProjectStage.STABLE,
                 null,
                 Set.of("internal"),
                 Set.of("Java")
@@ -168,6 +181,7 @@ class ProjectControllerIntegrationTests {
     private void saveProject(
             String slug,
             ProjectStatus status,
+            ProjectStage stage,
             Instant publishedAt,
             Set<String> tags,
             Set<String> stack
@@ -178,6 +192,7 @@ class ProjectControllerIntegrationTests {
         project.setSummary("Summary " + slug);
         project.setDescription("Description " + slug);
         project.setStatus(status);
+        project.setStage(stage);
         project.setPublishedAt(publishedAt);
         project.setTags(new LinkedHashSet<>(tags));
         project.setStack(new LinkedHashSet<>(stack));

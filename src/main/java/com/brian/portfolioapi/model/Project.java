@@ -60,6 +60,10 @@ public class Project {
     @Column(nullable = false, length = 12)
     private ProjectStatus status = ProjectStatus.DRAFT;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 24)
+    private ProjectStage stage = ProjectStage.STABLE;
+
     private Instant publishedAt;
 
     @Column(nullable = false, updatable = false)
@@ -94,12 +98,14 @@ public class Project {
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();
+        this.stage = getStage();
         this.createdAt = now;
         this.updatedAt = now;
     }
 
     @PreUpdate
     void onUpdate() {
+        this.stage = getStage();
         this.updatedAt = Instant.now();
     }
 
@@ -145,6 +151,14 @@ public class Project {
 
     public void setStatus(ProjectStatus status) {
         this.status = status;
+    }
+
+    public ProjectStage getStage() {
+        return stage == null ? ProjectStage.STABLE : stage;
+    }
+
+    public void setStage(ProjectStage stage) {
+        this.stage = stage == null ? ProjectStage.STABLE : stage;
     }
 
     public Instant getPublishedAt() {

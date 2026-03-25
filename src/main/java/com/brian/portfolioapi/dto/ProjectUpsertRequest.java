@@ -1,5 +1,6 @@
 package com.brian.portfolioapi.dto;
 
+import com.brian.portfolioapi.model.ProjectStage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -20,5 +21,6 @@ public record ProjectUpsertRequest(
         String repoUrl,
         String demoUrl,
 
+        ProjectStage stage,
         Instant publishedAt
 ) {}

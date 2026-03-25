@@ -19,6 +19,7 @@ public final class ProjectMapper {
                 p.getSlug(),
                 p.getTitle(),
                 p.getSummary(),
+                p.getStage(),
                 p.getPublishedAt(),
                 List.copyOf(p.getTags()),
                 List.copyOf(p.getStack()),
@@ -34,6 +35,7 @@ public final class ProjectMapper {
                 p.getTitle(),
                 p.getSummary(),
                 p.getDescription(),
+                p.getStage(),
                 p.getPublishedAt(),
                 List.copyOf(p.getTags()),
                 List.copyOf(p.getStack()),
@@ -49,6 +51,7 @@ public final class ProjectMapper {
                 p.getTitle(),
                 p.getSummary(),
                 p.getStatus(),
+                p.getStage(),
                 p.getPublishedAt(),
                 p.getUpdatedAt()
         );
@@ -61,6 +64,7 @@ public final class ProjectMapper {
                 p.getSummary(),
                 p.getDescription(),
                 p.getStatus(),
+                p.getStage(),
                 p.getPublishedAt(),
                 p.getCreatedAt(),
                 p.getUpdatedAt(),
